@@ -26,7 +26,7 @@ elif AUTH_TYPE == "basic_auth":
 def before_req():
     """Filters each request"""
     if auth is None:
-        return
+        pass
     else:
         excluded = [
                 '/api/v1/status/',
@@ -36,15 +36,15 @@ def before_req():
         path = request.path
         if auth.require_auth(path, excluded):
             if auth.authorization_header(request) is None:
-                abort(401)
+                abort(401, description="Unauthorized")
             current_user = auth.current_user(request)
-            if current_user is None:
-                abort(403)
+            if current_user(request) is None:
+                abort(403, description="Forbidden")
 
 
 @app.errorhandler(401)
 def req_unauthorized(error) -> str:
-    """ Unauthorized error
+    """ Handler for unauthorized error
     """
     return jsonify({"error": "Unauthorized"}), 401
 

@@ -74,16 +74,16 @@ class BasicAuth(Auth):
             return None
         return users[0]
 
-     def current_user(self, request=None) -> TypeVar('User'):
+      def current_user(self, request=None) -> TypeVar('User'):
+        """Bombards 'Auth' to retrieve the 'User' instance for a request
         """
-        Returns a User instance based on a received request
-        """
-        Auth_header = self.authorization_header(request)
-        if Auth_header is not None:
-            token = self.extract_base64_authorization_header(Auth_header)
-            if token is not None:
-                decoded = self.decode_base64_authorization_header(token)
-                if decoded is not None:
-                    email, pword = self.extract_user_credentials(decoded)
-                    if email is not None:
-                        return self.user_object_from_credentials(email, pword)
+        auth_header = self.authorization_header(request)
+        auth_str = self.extract_base64_authorization_header(auth_header)
+        if auth_str is None:
+            return None
+
+        decoded_auth = self.decode_base64_authorization_header(auth_str)
+        user_credentials = self.extract_user_credentials(decoded_auth)
+        if user_credentials is None:
+            return None
+        return self.user_object_from_credentials(*user_credentials)
