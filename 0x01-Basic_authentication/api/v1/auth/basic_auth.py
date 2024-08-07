@@ -2,9 +2,10 @@
 """Module for Basic Auth"""
 from api.v1.auth.auth import Auth
 from models.user import User
-from typing import TypeVar
+from typing import Tuple, TypeVar
 import base64
 import re
+import binascii
 
 
 class BasicAuth(Auth):
@@ -78,12 +79,12 @@ class BasicAuth(Auth):
         """Bombards 'Auth' to retrieve the 'User' instance for a request
         """
         auth_header = self.authorization_header(request)
-        auth_str = self.extract_base64_authorization_header(auth_header)
-        if auth_str is None:
+        auth_token = self.extract_base64_authorization_header(auth_header)
+        if auth_token is None:
             return None
 
-        decoded_auth = self.decode_base64_authorization_header(auth_str)
-        user_credentials = self.extract_user_credentials(decoded_auth)
+        dec_auth = self.decode_base64_authorization_header(auth_token)
+        user_credentials = self.extract_user_credentials(dec_auth)
         if user_credentials is None:
             return None
         return self.user_object_from_credentials(*user_credentials)
