@@ -35,24 +35,11 @@ def before_req():
         ]
         path = request.path
         if auth.require_auth(path, excluded):
-            if auth.authorization_header(request) is None:
-                abort(401, description="Unauthorized")
-            current_user = auth.current_user(request)
-            if current_user(request) is None:
-                abort(403, description="Forbidden")
-
-
-@app.errorhandler(401)
-def req_unauthorized(error) -> str:
-    """ Handler for unauthorized error """
-    return jsonify({"error": "Unauthorized"}), 401
-
-
-@app.errorhandler(403)
-def req_forbidden(error) -> str:
-    """ Handles Forbidden error """
-    return jsonify({"error": "Forbidden"}), 403
-
+            if not auth.is_authorized(request):
+                return jsonify({'error': 'Unauthorized'}), 401
+            user = auth.get_current_user(request)
+            if not user:
+                return jsonify({'error': 'Forbidden'}), 403
 
 @app.errorhandler(404)
 def not_found(error) -> str:
